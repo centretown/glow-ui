@@ -7,11 +7,13 @@
 #include "wait.h"
 
 #ifdef ARDUINO
+
 #include "RotaryUpdater.h"
-#include "RotaryHandler.h"
+#include "StateHandler.h"
+
 using glow::print_line;
-using glowui::RotaryHandler;
 using glowui::RotaryUpdater;
+using glow::StateHandler;
 
 const uint8_t encoderA = 21;
 const uint8_t encoderB = 5;
@@ -21,10 +23,10 @@ struct RotaryTarget
 {
     uint32_t ticks = 0;
     char buffer[32];
-    uint8_t lastState = 0xff;
-    int16_t lastPosition = 0x7fff;
+    uint8_t lastState = 0;
+    int16_t lastPosition = 0;
 
-    void Update(uint8_t state, uint16_t position)
+    void Update(uint8_t state, int16_t delta)
     {
         if (state != lastState)
         {
@@ -35,9 +37,9 @@ struct RotaryTarget
             ++ticks;
         }
 
-        if (position != lastPosition)
+        if (delta != 0)
         {
-            lastPosition = position;
+            lastPosition += delta;
             snprintf(buffer, sizeof(buffer),
                      "b=%u p=%d\n", lastState, lastPosition);
             print_line(buffer);
@@ -50,7 +52,7 @@ struct RotaryTarget
 void testLoop(RotaryUpdater &rotary,
               uint32_t count = 50000, uint32_t ms = 10)
 {
-    RotaryHandler handler;
+    StateHandler handler;
     RotaryTarget target;
 
     for (uint32_t i = 0; i < count; i++)
@@ -71,14 +73,14 @@ void testRotaryButton()
     RotaryUpdater rotary(encoderA, encoderB, button, range.Pack());
 
     snprintf(buffer, sizeof(buffer),
-             "b=%u p=%d\n", rotary.ButtonState(), rotary.Position());
+             "b=%u p=%d\n", rotary.State(), rotary.Position());
     print_line(buffer);
     wait(1000);
 
     testLoop(rotary);
 
     snprintf(buffer, sizeof(buffer),
-             "b=%u p=%d\n", rotary.ButtonState(), rotary.Position());
+             "b=%u p=%d\n", rotary.State(), rotary.Position());
     print_line(buffer);
 }
 #endif // ARDUINO

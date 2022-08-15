@@ -10,7 +10,7 @@
 
 namespace glowui
 {
-  uint16_t RotaryUpdater::Update()
+  uint32_t RotaryUpdater::Update()
   {
     static const int8_t states[] = {
         0, -1, 1, 0, //
@@ -20,7 +20,12 @@ namespace glowui
     };
 
     encoderIndex <<= 2; // include previous state
-    buttonState = digitalRead(button);
+    uint8_t b = digitalRead(button);
+    if (b != buttonState)
+    {
+      buttonState = b;
+      state++;
+    }
 
     if (digitalRead(encoderA))
       encoderIndex |= 0x02; // Add current state of pin A
@@ -41,7 +46,11 @@ namespace glowui
       encoderState = 0;
     }
 
-    return 0;
+    if (position >= bounds.End())
+    {
+      position = (encoderState > 0) ? bounds.End() - 1 : 0;
+    }
+    return pack;
   }
 }
 

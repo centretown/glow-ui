@@ -5,29 +5,31 @@
 #ifdef ARDUINO
 
 #include "Range.h"
+#include "State.h"
 
 using glow::Range;
+using glow::State;
 using glow::range_pack;
 
 namespace glowui
 {
-    class RotaryUpdater
+    class RotaryUpdater : public State
     {
     private:
         const uint8_t encoderA;
         const uint8_t encoderB;
         const uint8_t button;
 
-        int16_t position = 0;
         uint8_t buttonState = HIGH;
-
         uint8_t encoderIndex = 3; // matrix index
         int8_t encoderState = 0;  // matrix state
+        Range bounds;             // position range
 
     public:
         RotaryUpdater(uint8_t encoderA,
                       uint8_t encoderB,
-                      uint8_t button, bool init = false)
+                      uint8_t button,
+                      bool init = false)
             : encoderA(encoderA),
               encoderB(encoderB),
               button(button)
@@ -38,20 +40,16 @@ namespace glowui
                 pinMode(encoderB, INPUT_PULLUP);
                 pinMode(button, INPUT_PULLUP);
             }
+            bounds(0, 255);
         }
 
-        uint16_t Update();
+        uint32_t Update();
 
-        inline uint8_t ButtonState() const
+        inline range_pack Bounds(uint16_t begin, uint16_t end)
         {
-            return buttonState;
+            bounds(begin, end);
+            return bounds.Pack();
         }
-
-        inline int16_t Position() const
-        {
-            return position;
-        }
-
     };
 } // namespace glowui
 
