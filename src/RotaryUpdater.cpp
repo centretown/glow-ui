@@ -24,7 +24,7 @@ namespace glowui
     if (b != buttonState)
     {
       buttonState = b;
-      state++;
+      status++;
     }
 
     if (digitalRead(encoderA))
