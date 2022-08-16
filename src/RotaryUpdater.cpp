@@ -46,11 +46,11 @@ namespace glowui
       encoderState = 0;
     }
 
-    if (position >= bounds.End())
-    {
-      position = (encoderState > 0) ? bounds.End() - 1 : 0;
-    }
-    return pack;
+    // if (position >= bounds.End())
+    // {
+    //   position = (encoderState > 0) ? bounds.End() - 1 : 0;
+    // }
+    return State(status, position).Pack();
   }
 }
 

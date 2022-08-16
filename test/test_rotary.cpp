@@ -12,8 +12,8 @@
 #include "StateHandler.h"
 
 using glow::print_line;
-using glowui::RotaryUpdater;
 using glow::StateHandler;
+using glowui::RotaryUpdater;
 
 const uint8_t encoderA = 21;
 const uint8_t encoderB = 5;
@@ -26,7 +26,7 @@ struct RotaryTarget
     uint8_t lastState = 0;
     int16_t lastPosition = 0;
 
-    void Update(uint8_t state, int16_t delta)
+    void Update(uint8_t state, int16_t position)
     {
         if (state != lastState)
         {
@@ -37,9 +37,9 @@ struct RotaryTarget
             ++ticks;
         }
 
-        if (delta != 0)
+        if (position != 0)
         {
-            lastPosition += delta;
+            lastPosition = position;
             snprintf(buffer, sizeof(buffer),
                      "b=%u p=%d\n", lastState, lastPosition);
             print_line(buffer);
@@ -52,15 +52,23 @@ struct RotaryTarget
 void testLoop(RotaryUpdater &rotary,
               uint32_t count = 50000, uint32_t ms = 10)
 {
+    char buffer[32];
     StateHandler handler;
     RotaryTarget target;
 
+    State state;
+
     for (uint32_t i = 0; i < count; i++)
     {
-        handler.Handle(rotary, target);
-        if (handler.Ticks() > 8)
+        uint32_t p = handler.Handle(rotary, target);
+        if (p != state.pack)
         {
-            return;
+            snprintf(buffer, sizeof(buffer),
+                     "rs=%x rp=%x\ns=%x p=%x\n",
+                     rotary.Status(), rotary.Position(), 
+                     state.Status(), state.Position());
+            print_line(buffer);
+            state.pack = p;
         }
         wait(1);
     }
@@ -70,17 +78,17 @@ void testRotaryButton()
 {
     char buffer[32];
     Range range(0, 100);
-    RotaryUpdater rotary(encoderA, encoderB, button, range.Pack());
+    RotaryUpdater rotary(encoderA, encoderB, button, true);
 
     snprintf(buffer, sizeof(buffer),
-             "b=%u p=%d\n", rotary.State(), rotary.Position());
+             "b=%u p=%d\n", rotary.Status(), rotary.Position());
     print_line(buffer);
     wait(1000);
 
     testLoop(rotary);
 
     snprintf(buffer, sizeof(buffer),
-             "b=%u p=%d\n", rotary.State(), rotary.Position());
+             "b=%u p=%d\n", rotary.Status(), rotary.Position());
     print_line(buffer);
 }
 #endif // ARDUINO

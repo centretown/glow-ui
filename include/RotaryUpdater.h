@@ -8,12 +8,12 @@
 #include "State.h"
 
 using glow::Range;
-using glow::State;
 using glow::range_pack;
+using glow::State;
 
 namespace glowui
 {
-    class RotaryUpdater : public State
+    class RotaryUpdater
     {
     private:
         const uint8_t encoderA;
@@ -24,6 +24,9 @@ namespace glowui
         uint8_t encoderIndex = 3; // matrix index
         int8_t encoderState = 0;  // matrix state
         Range bounds;             // position range
+
+        uint16_t status = 0;
+        uint16_t position = 0;
 
     public:
         RotaryUpdater(uint8_t encoderA,
@@ -50,6 +53,10 @@ namespace glowui
             bounds(begin, end);
             return bounds.Pack();
         }
+        inline int16_t Status() const { return status; }
+        inline int16_t Status(int16_t v) { return status = v; }
+        inline int16_t Position() const { return position; }
+        inline int16_t Position(int16_t v) { return position = v; }
     };
 } // namespace glowui
 
