@@ -6,14 +6,16 @@
 
 #include "Range.h"
 #include "State.h"
+#include "Updater.h"
 
 using glow::Range;
 using glow::range_pack;
+using glow::Source;
 using glow::State;
 
 namespace glowui
 {
-    class RotaryUpdater
+    class RotaryUpdater : public Source
     {
     private:
         const uint8_t encoderA;
@@ -46,6 +48,7 @@ namespace glowui
             bounds(0, 255);
         }
 
+        // Source.Update()
         uint32_t Update();
 
         inline range_pack Bounds(uint16_t begin, uint16_t end)
